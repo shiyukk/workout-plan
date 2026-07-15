@@ -1,0 +1,8 @@
+# Claude Code local project config
+.claude/
+
+# macOS
+.DS_Store
+
+# duplicate publish copy of workout-plan.html
+plan.html
