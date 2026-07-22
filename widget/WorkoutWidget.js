@@ -134,101 +134,100 @@ function txt(st, s, size, color, w) {
 function divider(main) { const l = main.addStack(); l.layoutHorizontally(); l.backgroundColor = LINE; l.addSpacer(); l.size = new Size(0, 1); }
 
 // ================= widget (design A, large) =================
+// Rendered as a flat DrawContext image + a single ListWidget.url — the same approach
+// as the schedule-planner widget, which opens its URL directly on tap. Nested-stack
+// widgets on some Scriptable builds route the tap through the app first; a flat image
+// with one url does not.
 const BASE = "https://shiyukk.github.io/workout-plan/";
+
+function dtext(ctx, s, x, y, w, size, color, weight, align) {
+  ctx.setFont(weight === "b" ? Font.boldSystemFont(size) : weight === "sb" ? Font.semiboldSystemFont(size) : Font.systemFont(size));
+  ctx.setTextColor(color);
+  if (align === "r") ctx.setTextAlignedRight(); else if (align === "c") ctx.setTextAlignedCenter(); else ctx.setTextAlignedLeft();
+  ctx.drawTextInRect(String(s), new Rect(x, y, w, size + 7));
+}
+function roundedFill(ctx, x, y, w, h, r, fill, stroke, lw) {
+  const p = new Path(); p.addRoundedRect(new Rect(x, y, w, h), r, r);
+  ctx.addPath(p); ctx.setFillColor(fill); ctx.fillPath();
+  if (stroke) { const p2 = new Path(); p2.addRoundedRect(new Rect(x + lw / 2, y + lw / 2, w - lw, h - lw), r, r); ctx.addPath(p2); ctx.setStrokeColor(stroke); ctx.setLineWidth(lw); ctx.strokePath(); }
+}
+function fitText(str, maxW, size) {
+  let wsum = 0, out = "";
+  for (const ch of String(str)) {
+    const cw = /[\x00-\xff]/.test(ch) ? size * 0.56 : size;
+    if (wsum + cw > maxW) return out + "…";
+    wsum += cw; out += ch;
+  }
+  return out;
+}
+
 function buildWidget(d, stale) {
   const b = BLOCKS[d.next];
-  const w = new ListWidget();
-  const bg = new LinearGradient();
-  bg.colors = [new Color("#ffffff"), new Color("#f4f6f9")];
-  bg.locations = [0, 1]; bg.startPoint = new Point(0, 0); bg.endPoint = new Point(0, 1);
-  w.backgroundGradient = bg;
-  w.setPadding(18, 18, 16, 18);
-  const CW = 40, CH = 24, CHIPW = 48, CHIPH = 27;
-  const main = w.addStack(); main.layoutVertically();
+  const W = 329, H = 345, PAD = 14, RIGHT = W - PAD, CW = 301;
+  const ctx = new DrawContext();
+  ctx.size = new Size(W, H); ctx.opaque = false; ctx.respectScreenScale = true;
+  ctx.setFillColor(new Color("#fbfcfd")); ctx.fillRect(new Rect(0, 0, W, H)); // light "day" bg
 
   // ---- 1) 本周 history ----
-  const s1 = main.addStack(); s1.layoutVertically();
-  const h1 = s1.addStack(); h1.centerAlignContent();
-  txt(h1, "本周", 12, MUT, "b");
-  h1.addSpacer();
-  const rs = h1.addStack(); rs.centerAlignContent();
-  txt(rs, String(d.count), 14, INK, "b"); txt(rs, " 练 · " + d.mins + "′", 12.5, MUT, "sb");
-  s1.addSpacer(10);
-  const week = s1.addStack(); week.layoutHorizontally();
+  dtext(ctx, stale ? "本周 · 离线" : "本周", PAD, 15, 160, 12, MUT, "b", "l");
+  dtext(ctx, d.count + " 练 · " + d.mins + "′", RIGHT - 170, 15, 170, 12.5, new Color("#3a3d45"), "sb", "r");
+  const cellW = 37, cgap = 6, cy = 38, ch = 24;
+  const wStart = PAD + (CW - (7 * cellW + 6 * cgap)) / 2;
   for (let i = 0; i < 7; i++) {
-    if (i > 0) week.addSpacer();
-    const col = week.addStack(); col.layoutVertically(); col.centerAlignContent();
-    const cell = col.addStack(); cell.layoutHorizontally(); cell.size = new Size(CW, CH); cell.cornerRadius = 9; cell.centerAlignContent();
-    const c = d.dayCell[i]; const isToday = i === d.todayIdx;
-    let label = "·", tc = FAINT;
-    if (isToday && c) { // trained today -> filled + thicker today ring
-      cell.backgroundColor = mix(c.color, 0.15); cell.borderWidth = 1.8; cell.borderColor = new Color(c.color); label = c.short; tc = new Color(c.color);
-    } else if (isToday) { // not trained yet -> "今" in the recommended color
-      cell.backgroundColor = mix(b.color, 0.10); cell.borderWidth = 1.6; cell.borderColor = new Color(b.color); label = "今"; tc = new Color(b.color);
-    } else if (c) { // a past day with a session
-      cell.backgroundColor = mix(c.color, 0.15); cell.borderWidth = 1; cell.borderColor = mix(c.color, 0.30); label = c.short; tc = new Color(c.color);
-    } else { cell.backgroundColor = EMPTYBG; }
-    cell.addSpacer(); const ct = cell.addText(label); ct.font = Font.boldSystemFont(12.5); ct.textColor = tc; cell.addSpacer();
-    col.addSpacer(5);
-    const wdw = col.addStack(); wdw.layoutHorizontally(); wdw.size = new Size(CW, 14); wdw.centerAlignContent();
-    wdw.addSpacer(); const wd = wdw.addText(WD[i]); wd.font = Font.semiboldSystemFont(11); wd.textColor = isToday ? new Color(b.color) : new Color("#a6a9b2"); wdw.addSpacer();
+    const x = wStart + i * (cellW + cgap);
+    const c = d.dayCell[i], isToday = i === d.todayIdx;
+    let label = "·", tcol = FAINT;
+    if (isToday && c) { roundedFill(ctx, x, cy, cellW, ch, 8, mix(c.color, 0.15), new Color(c.color), 1.8); label = c.short; tcol = new Color(c.color); }
+    else if (isToday) { roundedFill(ctx, x, cy, cellW, ch, 8, mix(b.color, 0.10), new Color(b.color), 1.6); label = "今"; tcol = new Color(b.color); }
+    else if (c) { roundedFill(ctx, x, cy, cellW, ch, 8, mix(c.color, 0.15), mix(c.color, 0.34), 1); label = c.short; tcol = new Color(c.color); }
+    else { roundedFill(ctx, x, cy, cellW, ch, 8, EMPTYBG, null, 0); }
+    dtext(ctx, label, x, cy + 4, cellW, 12.5, tcol, "b", "c");
+    dtext(ctx, WD[i], x, cy + ch + 5, cellW, 11, isToday ? new Color(b.color) : new Color("#a6a9b2"), "sb", "c");
   }
 
-  main.addSpacer(); divider(main); main.addSpacer();
+  ctx.setFillColor(LINE); ctx.fillRect(new Rect(PAD, 92, CW, 1)); // divider
 
   // ---- 2) 💪 muscle ----
-  const s2 = main.addStack(); s2.layoutVertically();
-  const h2s = s2.addStack(); h2s.centerAlignContent();
-  const em = d.doneToday ? "✅" : "💪";
-  const prefix = d.doneToday ? "明日推荐 · " : "";
-  txt(h2s, em + " " + prefix + b.name, 15, new Color(b.color), "b");
-  h2s.addSpacer();
-  txt(h2s, "≈ " + b.total + "′", 13, MUT, "sb");
-  s2.addSpacer(7);
-  for (const [name, sr] of b.ex) {
-    s2.addSpacer(6);
-    const row = s2.addStack(); row.layoutHorizontally(); row.centerAlignContent();
-    const tick = row.addStack(); tick.size = new Size(17, 17); tick.cornerRadius = 8.5; tick.borderWidth = 1.7; tick.borderColor = new Color("#cfd3da");
-    row.addSpacer(10);
-    txt(row, name, 14.5, INK, null);
-    row.addSpacer();
-    txt(row, sr, 12.5, MUT, null).rightAlignText();
+  const head = (d.doneToday ? "✅ 明日推荐 · " : "💪 ") + b.name;
+  dtext(ctx, fitText(head, 200, 15), PAD, 101, 205, 15, new Color(b.color), "b", "l");
+  dtext(ctx, "≈ " + b.total + "′", RIGHT - 82, 103, 82, 13, MUT, "sb", "r");
+  const exTop = 126, exBot = 270, n = b.ex.length, rowH = (exBot - exTop) / n;
+  for (let i = 0; i < n; i++) {
+    const midY = exTop + i * rowH + rowH / 2;
+    const ring = new Path(); ring.addEllipse(new Rect(PAD, midY - 7.5, 15, 15));
+    ctx.addPath(ring); ctx.setStrokeColor(new Color("#cfd3da")); ctx.setLineWidth(1.6); ctx.strokePath();
+    dtext(ctx, fitText(b.ex[i][0], 176, 14.5), PAD + 24, midY - 10, 190, 14.5, INK, null, "l");
+    dtext(ctx, b.ex[i][1], RIGHT - 92, midY - 9, 92, 12.5, MUT, null, "r");
   }
 
-  main.addSpacer(); divider(main); main.addSpacer();
+  ctx.setFillColor(LINE); ctx.fillRect(new Rect(PAD, 280, CW, 1)); // divider
 
   // ---- 3) 🏃 cardio ----
-  const s3 = main.addStack(); s3.layoutVertically();
-  const h3 = s3.addStack(); h3.centerAlignContent();
-  txt(h3, "🏃 有氧", 15, new Color(CARDIO.color), "b");
-  h3.addSpacer();
-  txt(h3, "20–30′", 13, MUT, "sb");
-  s3.addSpacer(10);
-  const chips = s3.addStack(); chips.layoutHorizontally();
-  for (let i = 0; i < CARDIO.opts.length; i++) {
-    if (i > 0) chips.addSpacer();
-    const chip = chips.addStack(); chip.layoutHorizontally(); chip.size = new Size(CHIPW, CHIPH); chip.cornerRadius = 10; chip.centerAlignContent();
-    chip.backgroundColor = mix(CARDIO.color, 0.13); chip.borderWidth = 1; chip.borderColor = mix(CARDIO.color, 0.27);
-    chip.addSpacer(); const t = chip.addText(CARDIO.opts[i]); t.font = Font.semiboldSystemFont(12.5); t.textColor = new Color(CARDIO.color); chip.addSpacer();
+  dtext(ctx, "🏃 有氧", PAD, 287, 160, 15, new Color(CARDIO.color), "b", "l");
+  dtext(ctx, "20–30′", RIGHT - 80, 289, 80, 13, MUT, "sb", "r");
+  const chn = CARDIO.opts.length, chgap = 6, chw = (CW - (chn - 1) * chgap) / chn, chy = 309, chh = 25;
+  for (let i = 0; i < chn; i++) {
+    const x = PAD + i * (chw + chgap);
+    roundedFill(ctx, x, chy, chw, chh, 9, mix(CARDIO.color, 0.13), mix(CARDIO.color, 0.30), 1);
+    dtext(ctx, CARDIO.opts[i], x, chy + 5, chw, 12.5, new Color(CARDIO.color), "sb", "c");
   }
 
-  if (stale) { main.addSpacer(4); const o = main.addText("离线缓存"); o.font = Font.systemFont(9.5); o.textColor = new Color("#f0a020"); }
-
-  // Single whole-widget deep link (ListWidget.url — most compatible). Tapping anywhere
-  // opens the web app directly in the browser, scrolled to today's block. Per-stack
-  // urls were dropped because some Scriptable builds don't honor WidgetStack.url and
-  // fall back to launching the app instead of opening the link.
-  w.url = BASE + "?day=" + d.next;
-  const next = new Date(); next.setMinutes(next.getMinutes() + 30); w.refreshAfterDate = next;
+  const w = new ListWidget();
+  w.backgroundColor = new Color("#fbfcfd");
+  w.setPadding(0, 0, 0, 0);
+  w.backgroundImage = ctx.getImage();
+  w.url = BASE + "?day=" + d.next; // tap → open the app at today's block, directly
+  const nx = new Date(); nx.setMinutes(nx.getMinutes() + 30); w.refreshAfterDate = nx;
   return w;
 }
 
 function buildError(msg) {
   const w = new ListWidget();
-  w.backgroundColor = new Color("#ffffff"); w.setPadding(18, 18, 18, 18);
+  w.backgroundColor = new Color("#fbfcfd"); w.setPadding(18, 18, 18, 18);
   txt(w, "💪 Workout", 13, MUT, "sb"); w.addSpacer(8);
   txt(w, msg, 14, INK, null); w.addSpacer(6);
   txt(w, "在 Scriptable 里运行一次以登录", 11, MUT, null);
+  w.url = BASE;
   return w;
 }
 
@@ -246,8 +245,8 @@ async function main() {
   const loaded = await loadState();
   const widget = loaded ? buildWidget(derive(loaded.state), loaded.stale)
                         : buildError(haveCreds() ? "读取失败" : "尚未登录");
-  if (config.runsInApp) await widget.presentLarge();
-  Script.setWidget(widget);
+  if (config.runsInWidget) Script.setWidget(widget);
+  else await widget.presentLarge();
   Script.complete();
 }
 await main();
