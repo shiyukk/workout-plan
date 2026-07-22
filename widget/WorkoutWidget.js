@@ -169,8 +169,8 @@ function buildWidget(d, stale) {
   ctx.setFillColor(new Color("#fbfcfd")); ctx.fillRect(new Rect(0, 0, W, H)); // light "day" bg
 
   // ---- 1) 本周 history ----
-  dtext(ctx, stale ? "本周 · 离线" : "本周", PAD, 15, 160, 12, MUT, "b", "l");
-  dtext(ctx, d.count + " 练 · " + d.mins + "′", RIGHT - 170, 15, 170, 12.5, new Color("#3a3d45"), "sb", "r");
+  dtext(ctx, stale ? "本周 · 离线" : "本周", PAD, 16, 160, 11, MUT, "b", "l");
+  dtext(ctx, d.count + " 练 · " + d.mins + "′", RIGHT - 170, 16, 170, 11.5, new Color("#3a3d45"), "sb", "r");
   const cellW = 37, cgap = 6, cy = 38, ch = 24;
   const wStart = PAD + (CW - (7 * cellW + 6 * cgap)) / 2;
   for (let i = 0; i < 7; i++) {
@@ -181,35 +181,35 @@ function buildWidget(d, stale) {
     else if (isToday) { roundedFill(ctx, x, cy, cellW, ch, 8, mix(b.color, 0.10), new Color(b.color), 1.6); label = "今"; tcol = new Color(b.color); }
     else if (c) { roundedFill(ctx, x, cy, cellW, ch, 8, mix(c.color, 0.15), mix(c.color, 0.34), 1); label = c.short; tcol = new Color(c.color); }
     else { roundedFill(ctx, x, cy, cellW, ch, 8, EMPTYBG, null, 0); }
-    dtext(ctx, label, x, cy + 4, cellW, 12.5, tcol, "b", "c");
-    dtext(ctx, WD[i], x, cy + ch + 5, cellW, 11, isToday ? new Color(b.color) : new Color("#a6a9b2"), "sb", "c");
+    dtext(ctx, label, x, cy + 6, cellW, 11, tcol, "b", "c");
+    dtext(ctx, WD[i], x, cy + ch + 6, cellW, 9.5, isToday ? new Color(b.color) : new Color("#a6a9b2"), "sb", "c");
   }
 
   ctx.setFillColor(LINE); ctx.fillRect(new Rect(PAD, 92, CW, 1)); // divider
 
   // ---- 2) 💪 muscle ----
   const head = (d.doneToday ? "✅ 明日推荐 · " : "💪 ") + b.name;
-  dtext(ctx, fitText(head, 200, 15), PAD, 101, 205, 15, new Color(b.color), "b", "l");
-  dtext(ctx, "≈ " + b.total + "′", RIGHT - 82, 103, 82, 13, MUT, "sb", "r");
+  dtext(ctx, fitText(head, 205, 13), PAD, 103, 210, 13, new Color(b.color), "b", "l");
+  dtext(ctx, "≈ " + b.total + "′", RIGHT - 82, 104, 82, 12, MUT, "sb", "r");
   const exTop = 126, exBot = 270, n = b.ex.length, rowH = (exBot - exTop) / n;
   for (let i = 0; i < n; i++) {
     const midY = exTop + i * rowH + rowH / 2;
     const ring = new Path(); ring.addEllipse(new Rect(PAD, midY - 7.5, 15, 15));
     ctx.addPath(ring); ctx.setStrokeColor(new Color("#cfd3da")); ctx.setLineWidth(1.6); ctx.strokePath();
-    dtext(ctx, fitText(b.ex[i][0], 176, 14.5), PAD + 24, midY - 10, 190, 14.5, INK, null, "l");
-    dtext(ctx, b.ex[i][1], RIGHT - 92, midY - 9, 92, 12.5, MUT, null, "r");
+    dtext(ctx, fitText(b.ex[i][0], 180, 13), PAD + 24, midY - 9, 190, 13, INK, null, "l");
+    dtext(ctx, b.ex[i][1], RIGHT - 92, midY - 8, 92, 11.5, MUT, null, "r");
   }
 
   ctx.setFillColor(LINE); ctx.fillRect(new Rect(PAD, 280, CW, 1)); // divider
 
   // ---- 3) 🏃 cardio ----
-  dtext(ctx, "🏃 有氧", PAD, 287, 160, 15, new Color(CARDIO.color), "b", "l");
-  dtext(ctx, "20–30′", RIGHT - 80, 289, 80, 13, MUT, "sb", "r");
+  dtext(ctx, "🏃 有氧", PAD, 288, 160, 13, new Color(CARDIO.color), "b", "l");
+  dtext(ctx, "20–30′", RIGHT - 80, 289, 80, 12, MUT, "sb", "r");
   const chn = CARDIO.opts.length, chgap = 6, chw = (CW - (chn - 1) * chgap) / chn, chy = 309, chh = 25;
   for (let i = 0; i < chn; i++) {
     const x = PAD + i * (chw + chgap);
     roundedFill(ctx, x, chy, chw, chh, 9, mix(CARDIO.color, 0.13), mix(CARDIO.color, 0.30), 1);
-    dtext(ctx, CARDIO.opts[i], x, chy + 5, chw, 12.5, new Color(CARDIO.color), "sb", "c");
+    dtext(ctx, CARDIO.opts[i], x, chy + 6, chw, 11, new Color(CARDIO.color), "sb", "c");
   }
 
   const w = new ListWidget();
