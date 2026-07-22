@@ -103,6 +103,8 @@ h1{font-size:clamp(26px,6.5vw,38px);line-height:1.1;font-weight:800;letter-spaci
 .login-hint.err{color:var(--chest)} .login-hint.ok{color:var(--good)}
 
 .day{margin-top:16px}
+.flash{animation:dlflash 1.7s ease; border-radius:14px}
+@keyframes dlflash{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}18%{box-shadow:0 0 0 3px rgba(34,197,94,.55)}}
 .daybar{display:flex;align-items:center;gap:11px;padding:14px 16px;border:1px solid var(--line);border-radius:16px 16px 0 0;border-bottom:none;background:linear-gradient(180deg,var(--surface),var(--surface-2))}
 .daybadge{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.06em;color:#1b1205;background:var(--accent);padding:6px 10px;border-radius:8px;white-space:nowrap}
 .daybadge.cd{background:var(--cardio);color:#04222e}
@@ -437,7 +439,7 @@ function exRow(baseEx, dayKey){
 function dayCard(day){
   day.ex.forEach((e,i)=>e._n=i+1);
   const badge={legs:'DAY 1',push:'DAY 2',pull:'DAY 3',abs:'核心'}[day.key];
-  return `<div class="day"><div class="daybar">
+  return `<div class="day" id="day-${day.key}"><div class="daybar">
       <span class="daybadge">${badge}</span>
       <div class="tt"><div class="nm">${day.name}</div><div class="mt">${day.sub} · ${day.ex.length} 个动作</div></div>
       <div class="est"><div class="n">≈${day.total}′</div><div class="l">含热身 ${day.warm}′</div></div>
@@ -729,4 +731,23 @@ save(); // persist any timer sanitization done at load
 syncPeriodUI(); renderAllCheckins(); renderDashboard(); renderInsights(); renderLog();
 eachActiveWeighted(ex=>renderWeightHint(ex.id,ex.inc));
 initCloud();
+
+/* ---------- deep link from the iOS home-screen widget ----------
+   ?day=legs|push|pull|abs  → scroll to that muscle block
+   ?sec=cardio              → scroll to the cardio section
+   ?sec=history             → scroll to the training log            */
+(function(){
+  try{
+    const p = new URLSearchParams(location.search);
+    const day = p.get('day'), sec = p.get('sec');
+    let el = null;
+    if(day) el = document.getElementById('day-'+day);
+    else if(sec==='cardio') el = document.getElementById('cardio');
+    else if(sec==='history'||sec==='log') el = document.getElementById('log');
+    if(el) setTimeout(()=>{
+      el.scrollIntoView({behavior:'smooth', block:'start'});
+      el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'), 1800);
+    }, 300);
+  }catch(e){}
+})();
 </script>
