@@ -14,17 +14,14 @@ and shows three sections:
 No Xcode, no Apple Developer account — it runs in the free **Scriptable** app.
 Add it at **Large** size.
 
-### Tapping (deep links)
+### Tapping (deep link)
 
-The large widget has three tap zones, each opening the web app scrolled + briefly
-highlighted to the matching section:
-
-- **本周 history** → the training log (`?sec=history`)
-- **💪 muscle** → today's recommended block, ready to check in (`?day=<key>`)
-- **🏃 cardio** → the cardio section (`?sec=cardio`)
-
-Deep-link handling lives in `index.html`; the widget just points each zone at the
-right URL. (`workout-plan.html`, the offline copy, is not deep-link aware.)
+Tapping anywhere on the widget opens the web app **directly in the browser**,
+scrolled + briefly highlighted to today's recommended block (`?day=<key>`). It uses a
+single whole-widget `ListWidget.url` — per-stack tap zones were dropped because some
+Scriptable builds don't honor `WidgetStack.url` and launch the app instead of opening
+the link. Deep-link handling (`?day=` / `?sec=`) lives in `index.html`.
+(`workout-plan.html`, the offline copy, is not deep-link aware.)
 
 When you've already trained a muscle block today, the muscle header switches to
 **✅ 明日推荐 · X** and today's history cell shows what you did.

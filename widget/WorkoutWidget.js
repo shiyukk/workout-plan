@@ -146,8 +146,8 @@ function buildWidget(d, stale) {
   const CW = 40, CH = 24, CHIPW = 48, CHIPH = 27;
   const main = w.addStack(); main.layoutVertically();
 
-  // ---- 1) 本周 history — tap → history/log ----
-  const s1 = main.addStack(); s1.layoutVertically(); s1.url = BASE + "?sec=history";
+  // ---- 1) 本周 history ----
+  const s1 = main.addStack(); s1.layoutVertically();
   const h1 = s1.addStack(); h1.centerAlignContent();
   txt(h1, "本周", 12, MUT, "b");
   h1.addSpacer();
@@ -176,8 +176,8 @@ function buildWidget(d, stale) {
 
   main.addSpacer(); divider(main); main.addSpacer();
 
-  // ---- 2) 💪 muscle — tap → open that block (?day=) ----
-  const s2 = main.addStack(); s2.layoutVertically(); s2.url = BASE + "?day=" + d.next;
+  // ---- 2) 💪 muscle ----
+  const s2 = main.addStack(); s2.layoutVertically();
   const h2s = s2.addStack(); h2s.centerAlignContent();
   const em = d.doneToday ? "✅" : "💪";
   const prefix = d.doneToday ? "明日推荐 · " : "";
@@ -197,8 +197,8 @@ function buildWidget(d, stale) {
 
   main.addSpacer(); divider(main); main.addSpacer();
 
-  // ---- 3) 🏃 cardio — tap → cardio section ----
-  const s3 = main.addStack(); s3.layoutVertically(); s3.url = BASE + "?sec=cardio";
+  // ---- 3) 🏃 cardio ----
+  const s3 = main.addStack(); s3.layoutVertically();
   const h3 = s3.addStack(); h3.centerAlignContent();
   txt(h3, "🏃 有氧", 15, new Color(CARDIO.color), "b");
   h3.addSpacer();
@@ -214,7 +214,11 @@ function buildWidget(d, stale) {
 
   if (stale) { main.addSpacer(4); const o = main.addText("离线缓存"); o.font = Font.systemFont(9.5); o.textColor = new Color("#f0a020"); }
 
-  w.url = BASE + "?day=" + d.next; // fallback (dividers/gaps): still opens the app at today's block, directly in the browser
+  // Single whole-widget deep link (ListWidget.url — most compatible). Tapping anywhere
+  // opens the web app directly in the browser, scrolled to today's block. Per-stack
+  // urls were dropped because some Scriptable builds don't honor WidgetStack.url and
+  // fall back to launching the app instead of opening the link.
+  w.url = BASE + "?day=" + d.next;
   const next = new Date(); next.setMinutes(next.getMinutes() + 30); w.refreshAfterDate = next;
   return w;
 }
