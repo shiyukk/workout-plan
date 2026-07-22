@@ -214,7 +214,7 @@ function buildWidget(d, stale) {
 
   if (stale) { main.addSpacer(4); const o = main.addText("离线缓存"); o.font = Font.systemFont(9.5); o.textColor = new Color("#f0a020"); }
 
-  w.url = BASE; // fallback: taps on dividers / outside the three zones
+  w.url = BASE + "?day=" + d.next; // fallback (dividers/gaps): still opens the app at today's block, directly in the browser
   const next = new Date(); next.setMinutes(next.getMinutes() + 30); w.refreshAfterDate = next;
   return w;
 }
