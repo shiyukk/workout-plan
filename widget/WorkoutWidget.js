@@ -4,7 +4,7 @@
 //   1. 本周   — a Mon–Sun history strip (colored per muscle block) + count/minutes
 //   2. 💪 今日肌肉 — the muscle block you've trained least recently (4-block rotation
 //      胸/背/臀腿/核心), its exercises (sets×reps), and an estimated time
-//   3. 🏃 有氧 — pick-any cardio options (快走/椭圆/单车/划船/跳绳/HIIT) · 20–30′
+//   3. 🏃 有氧 — pick-any cardio options (坡度快走/跑步机/划船机/HIIT) · 20–30′
 //
 // SETUP (once):
 //   1. Install the free "Scriptable" app from the App Store.
@@ -21,21 +21,21 @@ const K_EMAIL = "wp_email", K_PW = "wp_pw", CACHE_FILE = "workout_widget_cache.j
 
 // muscle catalog (mirrors index.html DAYS) — [name, sets×reps]
 const BLOCKS = {
-  legs: { name: "腿 & 臀",   short: "腿", color: "#f2760c", total: 42, ex: [
-    ["哑铃高脚杯深蹲", "3×10–12"], ["哑铃罗马尼亚硬拉", "3×10–12"], ["哑铃箭步蹲", "3×每腿10"],
+  legs: { name: "腿 & 臀",   short: "腿", color: "#f2760c", total: 43, ex: [
+    ["哑铃高脚杯深蹲", "3×10–12"], ["哑铃罗马尼亚硬拉", "3×10–12"], ["坐姿腿举（leg press）", "3×10–12"],
     ["坐姿腿屈伸（伸膝）", "3×12–15"], ["坐姿腿弯举（屈膝）", "3×12–15"] ] },
   push: { name: "胸·肩·三头", short: "胸", color: "#2f6bff", total: 39, ex: [
-    ["坐姿推胸器", "3×10–12"], ["上斜哑铃卧推", "3×10–12"], ["坐姿哑铃肩推", "3×10–12"],
-    ["哑铃侧平举", "3×12–15"], ["坐姿哑铃臂屈伸", "3×12–15"] ] },
+    ["坐姿推胸器", "3×10–12"], ["上斜哑铃卧推", "3×10–12"], ["坐姿肩推（器械）", "3×10–12"],
+    ["哑铃侧平举", "3×12–15"], ["绳索三头下压", "3×12–15"] ] },
   pull: { name: "背·二头",   short: "背", color: "#12a150", total: 38, ex: [
-    ["杠杆下拉机（反握）", "3×10–12"], ["胸垫坐姿划船", "3×10–12"], ["哑铃俯身反向飞鸟", "3×12–15"],
+    ["高位下拉", "3×10–12"], ["胸垫坐姿划船", "3×10–12"], ["哑铃俯身反向飞鸟", "3×12–15"],
     ["俯身哑铃划船", "3×10–12"], ["哑铃弯举", "3×12–15"] ] },
   abs:  { name: "核心·腹肌", short: "核", color: "#8b3ff0", total: 21, ex: [
     ["仰卧卷腹", "3×15–20"], ["反向卷腹", "3×12–15"], ["俄罗斯转体", "3×每侧12"],
     ["死虫式", "3×每侧8"], ["交替打腿", "3×30秒"], ["平板支撑转体", "3×30–45秒"] ] },
 };
 const ROTATION = ["legs", "push", "pull", "abs"]; // 4-block rotation incl. core
-const CARDIO = { short: "氧", color: "#e11d64", opts: ["快走", "椭圆", "单车", "划船", "跳绳", "HIIT"] };
+const CARDIO = { short: "氧", color: "#e11d64", opts: ["坡度快走", "跑步机", "划船机", "HIIT"] };
 const WD = ["一", "二", "三", "四", "五", "六", "日"];
 
 // ================= date helpers (match the web app) =================

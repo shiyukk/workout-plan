@@ -291,7 +291,7 @@ const DAYS = [{"key": "legs", "name": "腿 & 臀", "sub": "下肢 · 臀部主�
 const SUPABASE_URL = (typeof window!=='undefined' && window.SUPABASE_URL) || '';
 const SUPABASE_ANON_KEY = (typeof window!=='undefined' && window.SUPABASE_ANON_KEY) || '';
 let supa=null, cloudUser=null, _syncTimer=null;
-const CARDIO = {"opts": [{"id": "walk", "name": "坡度快走", "hue": "cardio", "intensity": "中低", "min": "20–30′", "kcal": "≈150–250", "note": "跑步机坡度 8–12%、5–6 km/h。最好上手、对膝盖友好，新手首选。"}, {"id": "row", "name": "划船机", "hue": "cardio", "intensity": "中高", "min": "15–20′", "kcal": "≈180", "note": "R300，同时练到背和心肺；记住“腿→核心→手臂”的发力顺序。"}, {"id": "bike", "name": "健身车", "hue": "cardio", "intensity": "中", "min": "20′", "kcal": "≈170", "note": "冲击小、可边看视频边蹬，适合恢复日或较长时间的匀速有氧。"}, {"id": "hiit", "name": "HIIT 间歇", "hue": "cardio", "intensity": "高", "min": "12–15′", "kcal": "≈180", "note": "在跑步机 / 健身车 / 划船机上做，如 30 秒冲刺 / 60 秒慢 ×8。时间短见效快，隔天做。"}]};
+const CARDIO = {"opts": [{"id": "walk", "name": "坡度快走", "hue": "cardio", "intensity": "中低", "min": "20–30′", "kcal": "≈150–250", "note": "跑步机坡度 8–12%、5–6 km/h。最好上手、对膝盖友好，新手首选。"}, {"id": "jog", "name": "跑步机跑步", "hue": "cardio", "intensity": "中高", "min": "15–20′", "kcal": "≈200–300", "note": "匀速慢跑，保持能说话但稍喘的强度；膝盖不适就退回坡度快走。"}, {"id": "row", "name": "划船机", "hue": "cardio", "intensity": "中高", "min": "15–20′", "kcal": "≈180", "note": "R300，同时练到背和心肺；记住“腿→核心→手臂”的发力顺序。"}, {"id": "hiit", "name": "HIIT 间歇", "hue": "cardio", "intensity": "高", "min": "12–15′", "kcal": "≈180", "note": "在跑步机或划船机上做，如 30 秒冲刺 / 60 秒慢 ×8。时间短见效快，隔天做。"}]};
 const LS_KEY = 'fitlog_v3';
 const DAY_NAMES = {legs:'腿 & 臀', push:'胸·肩·三头', pull:'背·二头', abs:'核心·腹肌', cardio:'有氧'};
 const DAY_SHORT = {legs:'腿臀', push:'推', pull:'拉', abs:'核心', cardio:'有氧'};
